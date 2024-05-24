@@ -1,16 +1,16 @@
-import React from 'react'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
-import NavBar from '../components/NavBar'
+import React from "react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import NavBar from "../components/NavBar";
 const Home = () => {
-    return (
-        <div>
-            <Header />
-            <NavBar />
+  return (
+    <div>
+      <Header />
+      <NavBar />
 
-            {/* <Footer /> */}
-        </div>
-    )
-}
+      {/* <Footer /> */}
+    </div>
+  );
+};
 
-export default Home
+export default Home;

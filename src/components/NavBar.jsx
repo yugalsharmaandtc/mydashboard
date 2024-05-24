@@ -24,7 +24,7 @@ function TabPanel(props) {
             {...other}
         >
             {value === index && (
-                <Box sx={{ p: 3 }}>
+                <Box sx={{ p: 1 }}>
                     <Typography>{children}</Typography>
                 </Box>
             )}
@@ -54,7 +54,7 @@ export default function VerticalTabs() {
 
     return (
         <Box
-            sx={{ flexGrow: 1, bgcolor: 'background.paper', display: { xs: 'none', md: 'flex' }, height: 164 }}
+            sx={{ flexGrow: 1, bgcolor: 'background.paper', display: { xs: 'none', md: 'flex' }, height: 565 }}
         >
             <Tabs
                 orientation="vertical"

@@ -5,7 +5,7 @@ import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
-import Refund from "../pages/Refunds"
+import Refund from "../pages/Refund"
 import Cancellation from '../pages/Cancellation';
 
 

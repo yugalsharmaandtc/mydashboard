@@ -59,8 +59,8 @@ const Refunds = () => {
         return response.json();
       })
       .then(data => {
-        // console.log('Fetched airlines data:', data); // Debug log to check fetched data
-        setAirlines(data.map(airline => airline.AIRLINE_NAME));
+         console.log('Fetched airlines data:', data); // Debug log to check fetched data
+        setAirlines(data);
       })
       .catch(error => console.error('There was an error fetching the airlines!', error));
   }, []);

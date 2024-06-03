@@ -1,43 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Divider, Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Grid } from '@mui/material';
+import { Divider, Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Grid, Button } from '@mui/material';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { fetchAirlines } from '../components/services/fetchAirlines'; // Correct path
+import { fetchTableData } from '../components/services/fetchTableData'; // Correct path
 
 const data = [{ name: 'Page A', uv: 400, pv: 2400, amt: 2400 }];
-const columns = [
-  { field: 'id', headerName: 'ID', width: 90 },
-  {
-    field: 'firstName',
-    headerName: 'First name',
-    width: 190,
-    editable: true,
-  },
-  {
-    field: 'lastName',
-    headerName: 'Last name',
-    width: 190,
-    editable: true,
-  },
-  {
-    field: 'age',
-    headerName: 'Age',
-    type: 'number',
-    width: 190,
-    editable: true,
-  },
-];
-
-const rows = [
-  { id: 1, lastName: 'Snow', firstName: 'Jon', age: 14 },
-  { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 31 },
-  { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 31 },
-  { id: 4, lastName: 'Stark', firstName: 'Arya', age: 11 },
-  { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-  { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-  { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-  { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-  { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-];
 
 const Refunds = () => {
   const [formData, setFormData] = useState({
@@ -49,21 +17,63 @@ const Refunds = () => {
     paymentGateway: ''
   });
   const [airlines, setAirlines] = useState([]);
+  const [tableData, setTableData] = useState([]);
+  const [columns, setColumns] = useState([]);
 
   useEffect(() => {
-    fetch('http://10.34.40.114:8000/airline') // Replace with your actual API endpoint
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-        return response.json();
-      })
-      .then(data => {
-         console.log('Fetched airlines data:', data); // Debug log to check fetched data
+    const getAirlines = async () => {
+      try {
+        const data = await fetchAirlines();
         setAirlines(data);
-      })
-      .catch(error => console.error('There was an error fetching the airlines!', error));
+      } catch (error) {
+        console.error('There was an error fetching the airlines!', error);
+      }
+    };
+    getAirlines();
   }, []);
+
+  const getTableData = async (formData) => {
+    try {
+      const formattedFormData = {
+        ...formData,
+        bookingDate: formatDate(formData.bookingDate),
+        bookingFrom: formatDate(formData.bookingFrom),
+        bookingTo: formatDate(formData.bookingTo)
+      };
+      
+      const response = await fetchTableData(formattedFormData);
+      
+      console.log('Full Response:', response); // Log the full response object
+      
+      // Assuming the response is an array of objects
+      const responseData = response; // No need to navigate further
+      
+      console.log('Response Data:', responseData); // Log the response data
+
+      if (!responseData || !Array.isArray(responseData)) {
+        console.error('Invalid response data format:', responseData);
+        return;
+      }
+
+      // Ensure each row has a unique `id` property
+      const dataWithIds = responseData.map((item, index) => ({ ...item, id: item.ID || index }));
+
+      if (dataWithIds.length > 0) {
+        const cols = Object.keys(dataWithIds[0]).map(key => ({
+          field: key,
+          headerName: key.charAt(0).toUpperCase() + key.slice(1),
+          width: 150,
+          editable: true,
+        }));
+        setColumns(cols);
+        setTableData(dataWithIds);
+      } else {
+        console.error('Empty response data array:', dataWithIds);
+      }
+    } catch (error) {
+      console.error('There was an error fetching the table data!', error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -73,11 +83,31 @@ const Refunds = () => {
     });
   };
 
+  const handleSelectChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    getTableData(formData);
+  };
+
+  const formatDate = (date) => {
+    if (!date) return '';
+    const [year, month, day] = date.split('-');
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${day}-${monthNames[parseInt(month, 10) - 1]}-${year}`;
+  };
+
   return (
     <div>
       <Typography variant='h4' sx={{ textAlign: "center", marginBottom: 4 }}>Refund Report</Typography>
       
-      <Box component="form" sx={{ flexGrow: 1, marginBottom: 4, width: '80%', margin: '0 auto' }}>
+      <Box component="form" sx={{ flexGrow: 1, marginBottom: 4, width: '80%', margin: '0 auto' }} onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <TextField
@@ -132,16 +162,12 @@ const Refunds = () => {
               <Select
                 name="airline"
                 value={formData.airline}
-                onChange={handleInputChange}
+                onChange={handleSelectChange}
                 label="Airline"
               >
                 <MenuItem value=""><em>None</em></MenuItem>
                 {airlines.map((airline) => (
-                  <>
-                  {console.log(airline)}
-                   <MenuItem key={airline.AIRLINE_NAME} value={airline.AIRLINE_NAME}>{airline.AIRLINE_NAME}</MenuItem>
-                  </>
-                 
+                  <MenuItem key={airline.AIRLINE_NAME} value={airline.AIRLINE_NAME}>{airline.AIRLINE_NAME}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -152,7 +178,7 @@ const Refunds = () => {
               <Select
                 name="paymentGateway"
                 value={formData.paymentGateway}
-                onChange={handleInputChange}
+                onChange={handleSelectChange}
                 label="Payment Gateway"
               >
                 <MenuItem value=""><em>None</em></MenuItem>
@@ -161,6 +187,9 @@ const Refunds = () => {
                 <MenuItem value="Gateway3">Gateway3</MenuItem>
               </Select>
             </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <Button type="submit" variant="contained" color="primary" fullWidth>Submit</Button>
           </Grid>
         </Grid>
       </Box>
@@ -175,7 +204,7 @@ const Refunds = () => {
       <Divider sx={{ marginTop: 4 }} />
       <Box sx={{ height: 400, width: '100%' }}>
         <DataGrid
-          rows={rows}
+          rows={tableData}
           columns={columns}
           initialState={{
             pagination: {

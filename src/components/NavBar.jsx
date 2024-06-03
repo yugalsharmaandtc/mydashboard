@@ -5,7 +5,7 @@ import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
-import Refund from "../pages/Refund"
+import Booking_Recon from "../pages/Booking_Recon"
 import Cancellation from '../pages/Cancellation';
 
 
@@ -73,7 +73,7 @@ export default function VerticalTabs() {
         <Tab label="Item Seven" {...a11yProps(6)} /> */}
             </Tabs>
             <TabPanel value={value} index={0}>
-              <Refund/>
+              <Booking_Recon/>
             </TabPanel>
             <TabPanel value={value} index={1}>
             <Cancellation/>
